@@ -1,0 +1,37 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio httpx argon2_cffi
+      - name: Run tests
+        run: pytest --cov=app --cov-fail-under=80 -v
+        env:
+          DATABASE_URL: sqlite:///./test.db
+          SECRET_KEY: test-secret-key-for-ci-only
+          ALGORITHM: HS256
+          ACCESS_TOKEN_EXPIRE_MINUTES: 30
+          CORS_ORIGINS: '["http://localhost:8080"]'
+          TESSERACT_CMD: tesseract
+          OPENAI_API_KEY: dummy-key
+          SMTP_HOST: smtp.gmail.com
+          SMTP_PORT: 587
+          SMTP_USER: test@test.com
+          SMTP_PASSWORD: dummy
+          STORAGE_PATH: ./storage
